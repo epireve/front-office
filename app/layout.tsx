@@ -7,16 +7,9 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { AppSidebar } from "@/components/app-sidebar";
+import { AppBreadcrumb } from "@/components/app-breadcrumb";
 import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -54,17 +47,7 @@ export default function RootLayout({
                 <header className="sticky top-0 z-10 flex items-center h-16 gap-2 px-4 shrink-0 bg-background">
                   <SidebarTrigger className="-ml-1" />
                   <Separator orientation="vertical" className="h-4 mr-2" />
-                  <Breadcrumb>
-                    <BreadcrumbList>
-                      <BreadcrumbItem className="hidden md:block">
-                        <BreadcrumbLink href="#">Front Office</BreadcrumbLink>
-                      </BreadcrumbItem>
-                      <BreadcrumbSeparator className="hidden md:block" />
-                      <BreadcrumbItem>
-                        <BreadcrumbPage>AI Assistant</BreadcrumbPage>
-                      </BreadcrumbItem>
-                    </BreadcrumbList>
-                  </Breadcrumb>
+                  <AppBreadcrumb />
                   <div className="flex-1" />
                   <ThemeToggle />
                 </header>

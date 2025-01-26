@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import {
   MessageSquare,
@@ -6,6 +8,8 @@ import {
   Database,
   FolderSearch,
 } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 import {
   Sidebar,
@@ -50,6 +54,9 @@ export function AppSidebar({
   className,
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
+  const router = useRouter();
+  const pathname = usePathname();
+
   return (
     <Sidebar
       variant="floating"
@@ -60,7 +67,7 @@ export function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="/">
+              <button onClick={() => router.push("/")}>
                 <div className="flex items-center justify-center rounded-lg aspect-square size-8 bg-primary text-primary-foreground">
                   <MessageSquare className="size-4" />
                 </div>
@@ -72,7 +79,7 @@ export function AppSidebar({
                     AI Assistant
                   </span>
                 </div>
-              </a>
+              </button>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -85,12 +92,16 @@ export function AppSidebar({
                 <SidebarMenuButton
                   asChild
                   tooltip={item.title}
-                  className="text-foreground hover:bg-accent hover:text-accent-foreground"
+                  className={cn(
+                    "text-foreground hover:bg-accent hover:text-accent-foreground",
+                    pathname === item.href &&
+                      "bg-accent text-accent-foreground",
+                  )}
                 >
-                  <a href={item.href}>
+                  <button onClick={() => router.push(item.href)}>
                     <item.icon className="size-4" />
                     <span>{item.title}</span>
-                  </a>
+                  </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
