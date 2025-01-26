@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/breadcrumb";
 
 const routeMap = {
+  "/clients": "Clients",
+  "/proposals": "Proposals",
+  "/emails": "Email Management",
   "/": "Simple Chat",
   "/structured_output": "Structured Output",
   "/agents": "Agents",

@@ -3,6 +3,9 @@
 import * as React from "react";
 import {
   MessageSquare,
+  Users,
+  FileText,
+  Mail,
   LayoutDashboard,
   Bot,
   Database,
@@ -23,6 +26,21 @@ import {
 
 // Front Office navigation items
 const navItems = [
+  {
+    title: "Clients",
+    href: "/clients",
+    icon: Users,
+  },
+  {
+    title: "Proposals",
+    href: "/proposals",
+    icon: FileText,
+  },
+  {
+    title: "Emails",
+    href: "/emails",
+    icon: Mail,
+  },
   {
     title: "Simple Chat",
     href: "/",
