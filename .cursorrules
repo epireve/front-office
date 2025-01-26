@@ -7,6 +7,13 @@
       "cn": "import { cn } from \"@/lib/utils\";"
     }
   },
+  "ai": {
+    "model": {
+      "name": "gpt-4o-mini",
+      "temperature": 0,
+      "maxTokens": 4096
+    }
+  },
   "componentFramework": {
     "name": "react",
     "style": "functional"
