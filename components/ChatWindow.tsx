@@ -58,7 +58,7 @@ function ScrollToBottom(props: { className?: string }) {
   return (
     <Button
       variant="outline"
-      className={props.className}
+      className={cn("absolute left-1/2 -translate-x-1/2", props.className)}
       onClick={() => scrollToBottom()}
     >
       <ArrowDown className="w-4 h-4" />
@@ -90,10 +90,10 @@ function ChatInput(props: {
           value={props.value}
           placeholder={props.placeholder}
           onChange={props.onChange}
-          className="border-none outline-none bg-transparent p-4"
+          className="p-4 overflow-hidden bg-transparent border-none outline-none text-ellipsis whitespace-nowrap"
         />
 
-        <div className="flex justify-between ml-4 mr-2 mb-2">
+        <div className="flex justify-between mb-2 ml-4 mr-2">
           <div className="flex gap-3">{props.children}</div>
 
           <Button type="submit" className="self-end" disabled={props.loading}>
@@ -264,7 +264,7 @@ export function ChatWindow(props: {
     <StickToBottom>
       <StickyToBottomContent
         className="absolute inset-0"
-        contentClassName="py-8 px-2"
+        contentClassName="py-8 pt-20 px-2"
         content={
           chat.messages.length === 0 ? (
             <div>{props.emptyStateComponent}</div>
@@ -278,8 +278,8 @@ export function ChatWindow(props: {
           )
         }
         footer={
-          <div className="sticky bottom-8 px-2">
-            <ScrollToBottom className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4" />
+          <div className="sticky bottom-4">
+            <ScrollToBottom className="mb-4 -translate-x-1/2 bottom-full left-1/2" />
             <ChatInput
               value={chat.input}
               onChange={chat.handleInputChange}

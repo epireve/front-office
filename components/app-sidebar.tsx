@@ -51,17 +51,23 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar variant="floating" {...props}>
-      <SidebarHeader>
+    <Sidebar
+      variant="floating"
+      className="border-r bg-background border-border"
+      {...props}
+    >
+      <SidebarHeader className="border-b border-border">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-accent-foreground">
+                <div className="flex items-center justify-center rounded-lg aspect-square size-8 bg-primary text-primary-foreground">
                   <MessageSquare className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">Front Office</span>
+                  <span className="font-semibold text-foreground">
+                    Front Office
+                  </span>
                   <span className="text-xs text-muted-foreground">
                     AI Assistant
                   </span>
@@ -76,7 +82,11 @@ export function AppSidebar({
           <SidebarMenu>
             {navItems.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton asChild tooltip={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={item.title}
+                  className="text-foreground hover:bg-accent hover:text-accent-foreground"
+                >
                   <a href={item.href}>
                     <item.icon className="size-4" />
                     <span>{item.title}</span>

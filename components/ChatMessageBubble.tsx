@@ -17,20 +17,20 @@ export function ChatMessageBubble(props: {
       )}
     >
       {props.message.role !== "user" && (
-        <div className="mr-4 border bg-secondary -mt-2 rounded-full w-10 h-10 flex-shrink-0 flex items-center justify-center">
+        <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 mr-4 -mt-2 border rounded-full bg-background">
           {props.aiEmoji}
         </div>
       )}
 
-      <div className="whitespace-pre-wrap flex flex-col">
+      <div className="flex flex-col whitespace-pre-wrap">
         <span>{props.message.content}</span>
 
         {props.sources && props.sources.length ? (
           <>
-            <code className="mt-4 mr-auto bg-primary px-2 py-1 rounded">
+            <code className="px-2 py-1 mt-4 mr-auto rounded bg-primary">
               <h2>🔍 Sources:</h2>
             </code>
-            <code className="mt-1 mr-2 bg-primary px-2 py-1 rounded text-xs">
+            <code className="px-2 py-1 mt-1 mr-2 text-xs rounded bg-primary">
               {props.sources?.map((source, i) => (
                 <div className="mt-2" key={"source:" + i}>
                   {i + 1}. &quot;{source.pageContent}&quot;
