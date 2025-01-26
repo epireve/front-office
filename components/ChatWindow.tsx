@@ -217,7 +217,6 @@ export function ChatWindow(props: {
     const responseMessages: Message[] = json.messages;
 
     // Represent intermediate steps as system messages for display purposes
-    // TODO: Add proper support for tool messages
     const toolCallMessages = responseMessages.filter(
       (responseMessage: Message) => {
         return (
@@ -232,11 +231,17 @@ export function ChatWindow(props: {
     for (let i = 0; i < toolCallMessages.length; i += 2) {
       const aiMessage = toolCallMessages[i];
       const toolMessage = toolCallMessages[i + 1];
+
+      // Skip if either message is missing or doesn't have the expected properties
+      if (!aiMessage?.tool_calls?.[0] || !toolMessage?.content) {
+        continue;
+      }
+
       intermediateStepMessages.push({
         id: (messagesWithUserReply.length + i / 2).toString(),
         role: "system" as const,
         content: JSON.stringify({
-          action: aiMessage.tool_calls?.[0],
+          action: aiMessage.tool_calls[0],
           observation: toolMessage.content,
         }),
       });

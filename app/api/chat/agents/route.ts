@@ -3,7 +3,6 @@ import { Message as VercelChatMessage, StreamingTextResponse } from "ai";
 
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
-import { SerpAPI } from "@langchain/community/tools/serpapi";
 import { Calculator } from "@langchain/community/tools/calculator";
 import {
   AIMessage,
@@ -12,6 +11,7 @@ import {
   HumanMessage,
   SystemMessage,
 } from "@langchain/core/messages";
+import { SerperSearchTool, TavilySearchTool } from "@/lib/tools/search";
 
 export const runtime = "edge";
 
@@ -39,10 +39,25 @@ const convertLangChainMessageToVercelMessage = (message: BaseMessage) => {
   }
 };
 
-const AGENT_SYSTEM_TEMPLATE = `You are a talking parrot named Polly. All final responses must be how a talking parrot would respond. Squawk often!`;
+const AGENT_SYSTEM_TEMPLATE = `You are a helpful AI assistant with access to powerful search tools. Use them wisely:
+
+1. For in-depth research and analysis:
+   - Use tavily-search for comprehensive information
+   - Perfect for company research, detailed analysis, and complex topics
+   - Provides high-quality, verified information optimized for RAG
+   - Always use this as your primary search tool
+
+2. For quick lookups:
+   - Use google-search for basic fact-checking
+   - Only use this for simple queries when Tavily would be overkill
+
+3. For calculations:
+   - Use calculator for any mathematical operations
+
+Remember: Tavily is your primary search tool - it provides RAG-optimized context for better understanding. Use it by default.`;
 
 /**
- * This handler initializes and calls an tool caling ReAct agent.
+ * This handler initializes and calls a tool-calling ReAct agent.
  * See the docs for more information:
  *
  * https://langchain-ai.github.io/langgraphjs/tutorials/quickstart/
@@ -62,9 +77,18 @@ export async function POST(req: NextRequest) {
       )
       .map(convertVercelMessageToLangChainMessage);
 
-    // Requires process.env.SERPAPI_API_KEY to be set: https://serpapi.com/
-    // You can remove this or use a different tool instead.
-    const tools = [new Calculator(), new SerpAPI()];
+    // Initialize tools with Tavily as the primary search tool
+    const tools = [
+      new TavilySearchTool({
+        searchDepth: "advanced",
+        maxResults: 8,
+        includeRawContent: true,
+        includeImages: false,
+      }),
+      new SerperSearchTool(),
+      new Calculator(),
+    ];
+    
     const chat = new ChatOpenAI({
       model: "gpt-4o-mini",
       temperature: 0,
