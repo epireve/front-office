@@ -1,0 +1,46 @@
+{
+  "packageManager": "bun",
+  "installCommand": "bun add {packages}",
+  "devInstallCommand": "bun add -d {packages}",
+  "imports": {
+    "@/lib/utils": {
+      "cn": "import { cn } from \"@/lib/utils\";"
+    }
+  },
+  "componentFramework": {
+    "name": "react",
+    "style": "functional"
+  },
+  "styleFramework": "tailwind",
+  "conventions": {
+    "react": {
+      "componentExtension": "tsx",
+      "styleExtension": "css",
+      "defaultExport": true,
+      "propsInterface": true
+    },
+    "imports": {
+      "preferNamed": true,
+      "grouping": [
+        "react",
+        "next",
+        "external",
+        "components",
+        "utils",
+        "styles"
+      ]
+    }
+  },
+  "formatting": {
+    "quotes": "double",
+    "semicolons": true,
+    "trailingComma": "es5"
+  },
+  "typescript": {
+    "strict": true
+  },
+  "testing": {
+    "framework": "vitest",
+    "componentTesting": "testing-library"
+  }
+} 
