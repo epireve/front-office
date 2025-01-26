@@ -2,12 +2,11 @@
   "name": "front-office-agent-system",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "yarn@3.5.1",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
+    "dev": "bun --bun next dev",
+    "build": "bun --bun next build",
+    "start": "bun --bun next start",
+    "lint": "bun --bun next lint",
     "format": "prettier --write \"app\""
   },
   "engines": {
