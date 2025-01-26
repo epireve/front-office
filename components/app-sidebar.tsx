@@ -53,7 +53,7 @@ export function AppSidebar({
   return (
     <Sidebar
       variant="floating"
-      className="border-r bg-background border-border"
+      className="bg-background border-border"
       {...props}
     >
       <SidebarHeader className="border-b border-border">
