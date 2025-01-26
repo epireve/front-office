@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { toast } from "sonner";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
+import ReactMarkdown from "react-markdown";
 
 import { ChatMessageBubble } from "@/components/ChatMessageBubble";
 import { IntermediateStep } from "./IntermediateStep";
@@ -132,6 +133,14 @@ function StickyToBottomContent(props: {
       </div>
 
       {props.footer}
+    </div>
+  );
+}
+
+function ChatMessageContent({ content }: { content: string }) {
+  return (
+    <div className="prose dark:prose-invert max-w-none">
+      <ReactMarkdown>{content}</ReactMarkdown>
     </div>
   );
 }

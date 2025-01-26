@@ -34,16 +34,41 @@ export class TavilySearchTool extends DynamicTool {
             maxResults: options.maxResults || 8,
             includeRawContent: options.includeRawContent ?? true,
             includeImages: options.includeImages ?? false,
-            filterDomain: options.filterDomain,
-            excludeDomain: options.excludeDomain,
           });
-          return result;
+
+          // Format the response as markdown
+          const formattedResult = this.formatAsMarkdown(result);
+          return formattedResult;
         } catch (error: any) {
           throw new Error(`Tavily search failed: ${error.message}`);
         }
       },
       ...options,
     });
+  }
+
+  private formatAsMarkdown(result: any): string {
+    try {
+      // Extract relevant information from the result
+      const { text, context } = result;
+
+      // Format the main content
+      let markdown = text ? `${text}\n\n` : "";
+
+      // Add context if available
+      if (context && Array.isArray(context)) {
+        context.forEach((item: any, index: number) => {
+          if (item.content) {
+            markdown += `### Source ${index + 1}\n${item.content}\n\n`;
+          }
+        });
+      }
+
+      return markdown.trim();
+    } catch (error) {
+      console.error("Error formatting markdown:", error);
+      return JSON.stringify(result);
+    }
   }
 }
 

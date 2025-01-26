@@ -1,53 +1,58 @@
+import { type Message } from "ai";
+import ReactMarkdown from "react-markdown";
 import { cn } from "@/utils/cn";
-import type { Message } from "ai/react";
+
+function ChatMessageContent({ content }: { content: string }) {
+  return (
+    <div className="prose dark:prose-invert max-w-none">
+      <ReactMarkdown>{content}</ReactMarkdown>
+    </div>
+  );
+}
 
 export function ChatMessageBubble(props: {
   message: Message;
   aiEmoji?: string;
-  sources: any[];
+  sources?: any[];
 }) {
+  const { message, aiEmoji, sources } = props;
+  const isAiMessage = message.role === "assistant";
+
   return (
-    <div
-      className={cn(
-        `rounded-[24px] max-w-[80%] mb-8 flex`,
-        props.message.role === "user"
-          ? "bg-secondary text-secondary-foreground px-4 py-2"
-          : null,
-        props.message.role === "user" ? "ml-auto" : "mr-auto",
-      )}
-    >
-      {props.message.role !== "user" && (
-        <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 mr-4 -mt-2 border rounded-full bg-background">
-          {props.aiEmoji}
-        </div>
-      )}
+    <div className="flex items-start w-full gap-4 py-4">
+      <div className="flex items-center justify-center w-8 h-8 p-1 text-center border rounded-md bg-primary-foreground shrink-0">
+        {isAiMessage ? (aiEmoji ? aiEmoji : "🤖") : "👤"}
+      </div>
+      <div className="flex-1 max-w-3xl">
+        <div
+          className={cn(
+            "flex flex-col space-y-2",
+            isAiMessage ? "rounded-lg" : "",
+            // isAiMessage ? "bg-muted/50 px-4 py-2 rounded-lg" : "",
+          )}
+        >
+          <ChatMessageContent content={message.content} />
 
-      <div className="flex flex-col whitespace-pre-wrap">
-        <span>{props.message.content}</span>
-
-        {props.sources && props.sources.length ? (
-          <>
-            <code className="px-2 py-1 mt-4 mr-auto rounded bg-primary">
-              <h2>🔍 Sources:</h2>
-            </code>
-            <code className="px-2 py-1 mt-1 mr-2 text-xs rounded bg-primary">
-              {props.sources?.map((source, i) => (
-                <div className="mt-2" key={"source:" + i}>
-                  {i + 1}. &quot;{source.pageContent}&quot;
-                  {source.metadata?.loc?.lines !== undefined ? (
-                    <div>
-                      <br />
-                      Lines {source.metadata?.loc?.lines?.from} to{" "}
-                      {source.metadata?.loc?.lines?.to}
-                    </div>
-                  ) : (
-                    ""
-                  )}
+          {sources && sources.length > 0 && (
+            <div className="pt-2 mt-2 border-t">
+              <p className="text-sm font-medium text-muted-foreground">
+                Sources:
+              </p>
+              {sources.map((source, i) => (
+                <div key={i} className="text-sm text-muted-foreground">
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    {source.title || source.url}
+                  </a>
                 </div>
               ))}
-            </code>
-          </>
-        ) : null}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
