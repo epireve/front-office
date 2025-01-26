@@ -1,6 +1,6 @@
 {
-  "name": "langchain-nextjs-template",
-  "version": "0.0.0",
+  "name": "front-office-agent-system",
+  "version": "0.0.1",
   "private": true,
   "packageManager": "yarn@3.5.1",
   "scripts": {
