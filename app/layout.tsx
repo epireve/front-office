@@ -16,6 +16,7 @@ import {
   Database,
   FolderSearch,
 } from "lucide-react";
+import { AppSidebar } from "@/components/app-sidebar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -62,25 +63,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <SidebarProvider defaultOpen>
           <div className="flex min-h-screen">
-            <Sidebar>
-              <SidebarHeader className="border-b border-border">
-                <h2 className="px-2 text-lg font-semibold">Front Office</h2>
-              </SidebarHeader>
-              <SidebarContent>
-                <SidebarMenu>
-                  {items.map((item) => (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild tooltip={item.title}>
-                        <a href={item.href}>
-                          <item.icon className="size-4" />
-                          <span>{item.title}</span>
-                        </a>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarContent>
-            </Sidebar>
+            <AppSidebar />
             <main className="flex-1 p-8">{children}</main>
           </div>
         </SidebarProvider>
