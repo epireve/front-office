@@ -31,6 +31,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Plus, Loader2 } from "lucide-react";
+import { createNewClient } from "@/app/clients/actions";
+import { useToast } from "@/components/ui/use-toast";
 
 const clientFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -54,6 +56,7 @@ const industries = [
 export function NewClientForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientFormSchema),
@@ -68,12 +71,27 @@ export function NewClientForm() {
   async function onSubmit(data: ClientFormValues) {
     setIsLoading(true);
     try {
-      // Here we'll trigger the AI agent to enrich the data
-      console.log("Form data:", data);
-      // TODO: Add API call to trigger AI agent
+      const result = await createNewClient(data);
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to create client");
+      }
+
+      toast({
+        title: "Success",
+        description: "Client added successfully. Starting data enrichment...",
+      });
+
       setIsOpen(false);
+      form.reset();
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error creating client:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to create client",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +101,7 @@ export function NewClientForm() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="mr-2 h-4 w-4" /> New Client
+          <Plus className="w-4 h-4 mr-2" /> New Client
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
@@ -172,7 +190,7 @@ export function NewClientForm() {
                 </FormItem>
               )}
             />
-            <div className="flex justify-end space-x-4 pt-4">
+            <div className="flex justify-end pt-4 space-x-4">
               <Button
                 type="button"
                 variant="outline"
@@ -181,7 +199,7 @@ export function NewClientForm() {
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 {isLoading ? "Processing..." : "Add Client"}
               </Button>
             </div>
