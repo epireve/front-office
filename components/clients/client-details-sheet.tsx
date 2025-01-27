@@ -20,6 +20,21 @@ import {
   Target,
   MapPinned,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 interface ClientDetailsSheetProps {
   client: {
@@ -50,6 +65,55 @@ interface ClientDetailsSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const FlushDataButton = ({ clientId }: { clientId: string }) => {
+  const handleFlushData = async () => {
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("clients")
+        .update({
+          enriched_data: null,
+          status: "pending_enrichment",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", clientId);
+
+      if (error) throw error;
+
+      toast.success("Successfully flushed enriched data");
+    } catch (error) {
+      console.error("Error flushing data:", error);
+      toast.error("Failed to flush enriched data");
+    }
+  };
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive" size="sm" className="gap-2">
+          <Trash2 className="w-4 h-4" />
+          Flush Enriched Data
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete all enriched data for this client. The
+            data will need to be re-enriched to restore it.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleFlushData}>
+            Flush Data
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
+
 export function ClientDetailsSheet({
   client,
   open,
@@ -59,12 +123,12 @@ export function ClientDetailsSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-[600px] sm:w-[540px]">
         <SheetHeader>
-          <SheetTitle className="text-2xl">{client.name}</SheetTitle>
+          <SheetTitle>{client.name}</SheetTitle>
           <SheetDescription>
             Added on {new Date(client.created_at).toLocaleDateString()}
           </SheetDescription>
         </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-120px)] pr-4">
+        <ScrollArea className="h-[calc(100vh-180px)] pr-4">
           <div className="mt-6 space-y-6">
             {/* Basic Information */}
             <div>
@@ -265,6 +329,9 @@ export function ClientDetailsSheet({
             )}
           </div>
         </ScrollArea>
+        <div className="flex justify-end pt-4 mt-4 border-t">
+          <FlushDataButton clientId={client.id} />
+        </div>
       </SheetContent>
     </Sheet>
   );
