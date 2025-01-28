@@ -18,6 +18,7 @@ const routeMap = {
   "/agents": "Agents",
   "/retrieval": "Retrieval",
   "/retrieval_agents": "Retrieval Agents",
+  "/ai_sdk": "Langchain x AI SDK RSC",
 };
 
 export function AppBreadcrumb() {

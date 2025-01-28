@@ -12,6 +12,7 @@ import {
   FolderSearch,
   LogOut,
   User,
+  Code,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -77,6 +78,11 @@ const navItems = [
     title: "Retrieval Agents",
     href: "/retrieval_agents",
     icon: FolderSearch,
+  },
+  {
+    title: "Langchain x AI SDK RSC",
+    href: "/ai_sdk",
+    icon: Code,
   },
 ];
 
