@@ -35,6 +35,7 @@ import {
 import { Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { EnrichmentTimer } from "@/components/clients/enrichment-timer";
 
 interface ClientDetailsSheetProps {
   client: {
@@ -60,6 +61,7 @@ interface ClientDetailsSheetProps {
       locations?: string[];
     };
     created_at: string;
+    updated_at?: string;
   };
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -176,9 +178,16 @@ export function ClientDetailsSheet({
       <SheetContent className="w-[600px] sm:w-[540px]">
         <SheetHeader>
           <SheetTitle>{client.name}</SheetTitle>
-          <SheetDescription>
-            Added on {new Date(client.created_at).toLocaleDateString()}
-          </SheetDescription>
+          <div className="flex flex-col gap-2">
+            <SheetDescription>
+              Added on {new Date(client.created_at).toLocaleDateString()}
+            </SheetDescription>
+            {client.status === "pending_enrichment" && (
+              <EnrichmentTimer
+                startTime={client.updated_at || client.created_at}
+              />
+            )}
+          </div>
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-180px)] pr-4">
           <div className="mt-6 space-y-6">

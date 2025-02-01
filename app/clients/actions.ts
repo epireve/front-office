@@ -114,12 +114,24 @@ export async function getClients() {
 
     if (error) {
       console.error('Error fetching clients:', error);
-      throw error;
+      return {
+        success: false,
+        clients: null,
+        error: error.message
+      };
     }
 
-    return { success: true, clients };
+    return {
+      success: true,
+      clients,
+      error: null
+    };
   } catch (error) {
     console.error('Error fetching clients:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error occurred' };
+    return {
+      success: false,
+      clients: null,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
   }
-} 
+}
