@@ -34,11 +34,32 @@ import { Plus, Loader2 } from "lucide-react";
 import { createNewClient } from "@/app/clients/actions";
 import { useToast } from "@/components/ui/use-toast";
 
+const normalizeUrl = (url: string) => {
+  if (!url) return url;
+  url = url.trim().toLowerCase();
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = "https://" + url;
+  }
+  try {
+    const urlObj = new URL(url);
+    return urlObj.toString();
+  } catch (e) {
+    return url;
+  }
+};
+
 const clientFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  website: z.string().url("Please enter a valid website URL"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
-  industry: z.string().min(2, "Please select an industry"),
+  website: z
+    .string()
+    .min(1, "Website is required")
+    .transform(normalizeUrl)
+    .pipe(z.string().url("Please enter a valid website URL")),
+  address: z
+    .string()
+    .min(2, "Please enter a location (city, state, country, etc.)"),
+  industry: z.string().min(2, "Please select or enter an industry"),
+  customIndustry: z.string().optional(),
 });
 
 type ClientFormValues = z.infer<typeof clientFormSchema>;
@@ -56,6 +77,7 @@ const industries = [
 export function NewClientForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [showCustomIndustry, setShowCustomIndustry] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<ClientFormValues>({
@@ -65,13 +87,21 @@ export function NewClientForm() {
       website: "",
       address: "",
       industry: "",
+      customIndustry: "",
     },
   });
 
   async function onSubmit(data: ClientFormValues) {
     setIsLoading(true);
     try {
-      const result = await createNewClient(data);
+      // If "Other" is selected, use the custom industry value
+      const finalData = {
+        ...data,
+        industry:
+          data.industry === "Other" ? data.customIndustry! : data.industry,
+      };
+
+      const result = await createNewClient(finalData);
 
       if (!result.success) {
         throw new Error(result.error || "Failed to create client");
@@ -134,14 +164,10 @@ export function NewClientForm() {
                 <FormItem>
                   <FormLabel>Website</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="https://example.com"
-                      type="url"
-                      {...field}
-                    />
+                    <Input placeholder="example.com" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Company website URL for AI data enrichment
+                    Company website URL - no need to add https://
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -152,10 +178,16 @@ export function NewClientForm() {
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address</FormLabel>
+                  <FormLabel>Location</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter company address" {...field} />
+                    <Input
+                      placeholder="City, State, Country, etc."
+                      {...field}
+                    />
                   </FormControl>
+                  <FormDescription>
+                    General location for research purposes
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -167,7 +199,10 @@ export function NewClientForm() {
                 <FormItem>
                   <FormLabel>Industry</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      setShowCustomIndustry(value === "Other");
+                    }}
                     defaultValue={field.value}
                   >
                     <FormControl>
@@ -190,6 +225,21 @@ export function NewClientForm() {
                 </FormItem>
               )}
             />
+            {showCustomIndustry && (
+              <FormField
+                control={form.control}
+                name="customIndustry"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Specify Industry</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter industry type" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <div className="flex justify-end pt-4 space-x-4">
               <Button
                 type="button"
