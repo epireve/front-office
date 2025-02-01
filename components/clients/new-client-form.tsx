@@ -34,94 +34,55 @@ import { Plus, Loader2 } from "lucide-react";
 import { createNewClient } from "@/app/clients/actions";
 import { useToast } from "@/components/ui/use-toast";
 
-const formSchema = z
-  .object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    website: z
-      .string()
-      .min(1, "Website is required")
-      .transform((val) => {
-        // Remove any existing protocol
-        let url = val.replace(/^(https?:\/\/)/, "");
-        // Add https:// if no protocol exists
-        return `https://${url}`;
-      }),
-    address: z
-      .string()
-      .min(1, "Address is required")
-      .describe("Enter location details like district, state, country"),
-    industry: z.string().min(1, "Industry is required"),
-    customIndustry: z.string().min(1, "Please specify the industry"),
-    email: z.string().email().optional().or(z.literal("")),
-  })
-  .refine(
-    (data) => {
-      // If industry is "other", customIndustry must be provided
-      if (data.industry === "other") {
-        return data.customIndustry.length > 0;
-      }
-      return true;
-    },
-    {
-      message: "Please specify the industry",
-      path: ["customIndustry"],
-    },
-  );
+const clientFormSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  website: z.string().url("Please enter a valid website URL"),
+  address: z.string().min(5, "Address must be at least 5 characters"),
+  industry: z.string().min(2, "Please select an industry"),
+});
+
+type ClientFormValues = z.infer<typeof clientFormSchema>;
 
 const industries = [
-  "technology",
-  "healthcare",
-  "finance",
-  "retail",
-  "manufacturing",
-  "education",
-  "real_estate",
-  "energy",
-  "transportation",
-  "hospitality",
-  "media",
-  "agriculture",
-  "construction",
-  "other",
-] as const;
+  "Technology",
+  "Healthcare",
+  "Finance",
+  "Manufacturing",
+  "Retail",
+  "Education",
+  "Other",
+];
 
 export function NewClientForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<ClientFormValues>({
+    resolver: zodResolver(clientFormSchema),
     defaultValues: {
       name: "",
       website: "",
       address: "",
       industry: "",
-      customIndustry: "",
-      email: "",
     },
   });
 
-  const selectedIndustry = form.watch("industry");
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(data: ClientFormValues) {
+    setIsLoading(true);
     try {
-      // Use custom industry value when "other" is selected
-      const finalIndustry =
-        values.industry === "other" ? values.customIndustry : values.industry;
+      const result = await createNewClient(data);
 
-      await createNewClient({
-        name: values.name,
-        website: values.website,
-        address: values.address,
-        industry: finalIndustry,
-        email: values.email || undefined,
-      });
+      if (!result.success) {
+        throw new Error(result.error || "Failed to create client");
+      }
 
       toast({
         title: "Success",
         description: "Client added successfully. Starting data enrichment...",
       });
+
+      setIsOpen(false);
       form.reset();
     } catch (error) {
       console.error("Error creating client:", error);
@@ -131,6 +92,8 @@ export function NewClientForm() {
           error instanceof Error ? error.message : "Failed to create client",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -171,8 +134,15 @@ export function NewClientForm() {
                 <FormItem>
                   <FormLabel>Website</FormLabel>
                   <FormControl>
-                    <Input placeholder="example.com" {...field} />
+                    <Input
+                      placeholder="https://example.com"
+                      type="url"
+                      {...field}
+                    />
                   </FormControl>
+                  <FormDescription>
+                    Company website URL for AI data enrichment
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -182,9 +152,9 @@ export function NewClientForm() {
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Location</FormLabel>
+                  <FormLabel>Address</FormLabel>
                   <FormControl>
-                    <Input placeholder="District, State, Country" {...field} />
+                    <Input placeholder="Enter company address" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -202,46 +172,20 @@ export function NewClientForm() {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select industry" />
+                        <SelectValue placeholder="Select an industry" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {industries.map((industry) => (
-                        <SelectItem key={industry} value={industry}>
-                          {industry.charAt(0).toUpperCase() +
-                            industry.slice(1).replace("_", " ")}
+                        <SelectItem
+                          key={industry}
+                          value={industry.toLowerCase()}
+                        >
+                          {industry}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {selectedIndustry === "other" && (
-              <FormField
-                control={form.control}
-                name="customIndustry"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Specify Industry</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter industry" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email (Optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="contact@company.com" {...field} />
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

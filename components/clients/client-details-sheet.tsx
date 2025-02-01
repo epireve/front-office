@@ -114,6 +114,58 @@ const FlushDataButton = ({ clientId }: { clientId: string }) => {
   );
 };
 
+const DeleteButton = ({
+  clientId,
+  onDelete,
+}: {
+  clientId: string;
+  onDelete: () => void;
+}) => {
+  const handleDelete = async () => {
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("clients")
+        .delete()
+        .eq("id", clientId);
+
+      if (error) throw error;
+
+      toast.success("Client deleted successfully");
+      onDelete();
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      toast.error("Failed to delete client");
+    }
+  };
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive" size="sm" className="gap-2">
+          <Trash2 className="w-4 h-4" />
+          Delete Client
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete the
+            client and all associated data.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete}>
+            Delete Client
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
+
 export function ClientDetailsSheet({
   client,
   open,
@@ -329,7 +381,11 @@ export function ClientDetailsSheet({
             )}
           </div>
         </ScrollArea>
-        <div className="flex justify-end pt-4 mt-4 border-t">
+        <div className="flex justify-end gap-2 pt-4 mt-4 border-t">
+          <DeleteButton
+            clientId={client.id}
+            onDelete={() => onOpenChange(false)}
+          />
           <FlushDataButton clientId={client.id} />
         </div>
       </SheetContent>
