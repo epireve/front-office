@@ -31,7 +31,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Plus, Loader2 } from "lucide-react";
-import { createNewClient } from "@/app/clients/actions";
+import { createNewClient } from "@/app/(main)/clients/actions";
 import { useToast } from "@/components/ui/use-toast";
 
 const normalizeUrl = (url: string) => {

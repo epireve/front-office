@@ -1,101 +1,82 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/components/providers/supabase-auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function SignInPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
   const router = useRouter();
+  const { signIn } = useAuth();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
     try {
       await signIn(email, password);
+      router.push("/main/clients");
+    } catch (error) {
       toast({
-        title: "Success!",
-        description: "You have been signed in successfully.",
-      });
-      router.push("/clients");
-    } catch (err) {
-      toast({
-        variant: "destructive",
         title: "Error",
-        description: err instanceof Error ? err.message : "Failed to sign in",
+        description: "Invalid email or password",
+        variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md p-8 space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Sign In</h1>
-          <p className="text-gray-600 mt-2">
-            Welcome back! Please sign in to continue.
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1"
-            />
-          </div>
-
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"}
-          </Button>
-        </form>
-
-        <p className="text-center text-sm text-gray-600">
-          Don't have an account?{" "}
-          <Link href="/auth/sign-up" className="text-blue-600 hover:underline">
-            Sign up
-          </Link>
+    <div className="space-y-6">
+      <div className="space-y-2 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Sign In</h1>
+        <p className="text-sm text-muted-foreground">
+          Welcome back! Please sign in to continue.
         </p>
-      </Card>
+      </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="name@example.com"
+            required
+            disabled={isLoading}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            disabled={isLoading}
+          />
+        </div>
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Signing in..." : "Sign In"}
+        </Button>
+      </form>
+      <div className="text-sm text-center">
+        Don&apos;t have an account?{" "}
+        <Link href="/auth/sign-up" className="text-primary hover:underline">
+          Sign up
+        </Link>
+      </div>
     </div>
   );
 }
