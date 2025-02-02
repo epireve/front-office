@@ -10,20 +10,11 @@ import {
   Bot,
   Database,
   FolderSearch,
-  LogOut,
-  User,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { UserAccountNav } from "@/components/user-account-nav";
 import { useAuth } from "@/components/providers/supabase-auth-provider";
 
 import {
@@ -86,7 +77,6 @@ export function AppSidebar({
 }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, signOut } = useAuth();
 
   return (
     <Sidebar
@@ -138,34 +128,15 @@ export function AppSidebar({
             ))}
           </SidebarMenu>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="justify-start w-full gap-2"
-                    >
-                      <User className="size-4" />
-                      <span className="truncate">{user?.email}</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={signOut}>
-                      <LogOut className="mr-2 size-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
+  );
+}
+
+export function SidebarInset({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex items-center gap-2 p-4", className)}>
+      <ThemeToggle />
+    </div>
   );
 }
