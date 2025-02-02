@@ -19,6 +19,7 @@ import {
   Code2,
   Target,
   MapPinned,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +37,7 @@ import { Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { EnrichmentTimer } from "@/components/clients/enrichment-timer";
+import { useState } from "react";
 
 interface ClientDetailsSheetProps {
   client: {
@@ -65,6 +67,7 @@ interface ClientDetailsSheetProps {
   };
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onClientDeleted?: () => void;
 }
 
 const FlushDataButton = ({ clientId }: { clientId: string }) => {
@@ -123,30 +126,69 @@ const DeleteButton = ({
   clientId: string;
   onDelete: () => void;
 }) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleDelete = async () => {
+    if (isDeleting) return;
+
+    setIsDeleting(true);
     try {
       const supabase = createClient();
-      const { error } = await supabase
+
+      // First, delete all related enrichment logs
+      const { error: logsError } = await supabase
+        .from("enrichment_logs")
+        .delete()
+        .eq("client_id", clientId);
+
+      if (logsError) {
+        console.error("Error deleting enrichment logs:", logsError);
+        throw logsError;
+      }
+
+      // Then delete the client
+      const { error: clientError } = await supabase
         .from("clients")
         .delete()
         .eq("id", clientId);
 
-      if (error) throw error;
+      if (clientError) {
+        console.error("Error deleting client:", clientError);
+        throw clientError;
+      }
 
       toast.success("Client deleted successfully");
       onDelete();
     } catch (error) {
       console.error("Error deleting client:", error);
-      toast.error("Failed to delete client");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete client",
+      );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm" className="gap-2">
-          <Trash2 className="w-4 h-4" />
-          Delete Client
+        <Button
+          variant="destructive"
+          size="sm"
+          className="gap-2"
+          disabled={isDeleting}
+        >
+          {isDeleting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Deleting...
+            </>
+          ) : (
+            <>
+              <Trash2 className="w-4 h-4" />
+              Delete Client
+            </>
+          )}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -159,8 +201,8 @@ const DeleteButton = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete}>
-            Delete Client
+          <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+            {isDeleting ? "Deleting..." : "Delete Client"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -172,6 +214,7 @@ export function ClientDetailsSheet({
   client,
   open,
   onOpenChange,
+  onClientDeleted,
 }: ClientDetailsSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -393,7 +436,10 @@ export function ClientDetailsSheet({
         <div className="flex justify-end gap-2 pt-4 mt-4 border-t">
           <DeleteButton
             clientId={client.id}
-            onDelete={() => onOpenChange(false)}
+            onDelete={() => {
+              onOpenChange(false);
+              onClientDeleted?.();
+            }}
           />
           <FlushDataButton clientId={client.id} />
         </div>

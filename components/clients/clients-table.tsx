@@ -182,6 +182,7 @@ export function ClientsTable({ clients, onRefresh }: ClientsTableProps) {
             client={selectedClient}
             open={!!selectedClient}
             onOpenChange={(open) => !open && setSelectedClient(null)}
+            onClientDeleted={onRefresh}
           />
           <ReEnrichDialog
             clientId={selectedClient.id}

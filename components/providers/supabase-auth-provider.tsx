@@ -106,11 +106,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       switch (event) {
         case "SIGNED_IN":
-          toast({
-            title: "Welcome back!",
-            description: `Signed in as ${session?.user?.email}`,
-          });
+          // Only show welcome toast if user is actually signing in (not just refreshing session)
           if (pathname?.startsWith("/auth/")) {
+            toast({
+              title: "Welcome back!",
+              description: `Signed in as ${session?.user?.email}`,
+            });
             await router.replace("/clients");
           }
           break;

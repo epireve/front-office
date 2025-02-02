@@ -230,6 +230,7 @@ export function ClientGrid({ clients, onRefresh }: ClientGridProps) {
           client={selectedClient}
           open={!!selectedClient}
           onOpenChange={(open) => !open && setSelectedClient(null)}
+          onClientDeleted={onRefresh}
         />
       )}
 
