@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from "@/lib/supabase/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -39,6 +39,7 @@ export async function createNewClient(data: ClientFormData) {
         email: validatedData.email,
         status: 'pending_enrichment',
         created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
       .select()
       .single();
@@ -50,48 +51,45 @@ export async function createNewClient(data: ClientFormData) {
 
     console.log('Client created successfully:', client);
 
-    // Start enrichment process
-    const { error: enrichmentError } = await supabase
-      .from('enrichment_logs')
-      .insert({
-        client_id: client.id,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-      });
+    // Get current request headers to maintain auth context
+    const headersList = headers();
+    const protocol = headersList.get("x-forwarded-proto") || "http";
+    const host = headersList.get("host") || "localhost:3000";
+    const baseUrl = `${protocol}://${host}`;
 
-    if (enrichmentError) {
-      console.error('Error creating enrichment log:', enrichmentError);
-      throw enrichmentError;
-    }
-
-    console.log('Enrichment log created successfully');
-
-    // Trigger enrichment process
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    console.log('Triggering enrichment at:', `${appUrl}/api/enrich`);
+    // Trigger enrichment process with absolute URL
+    console.log('Triggering enrichment at:', `${baseUrl}/api/enrich`);
     
-    const enrichmentResponse = await fetch(`${appUrl}/api/enrich`, {
+    const enrichmentResponse = await fetch(`${baseUrl}/api/enrich`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Cookie: cookieStore.toString(), // Forward auth cookies
       },
       body: JSON.stringify({
         clientId: client.id,
         name: client.name,
         website: client.website,
         industry: client.industry,
+        isInitialEnrichment: true, // Flag to indicate this is a new client
       }),
     });
 
     if (!enrichmentResponse.ok) {
-      console.error('Enrichment API error:', await enrichmentResponse.text());
-      throw new Error('Failed to trigger enrichment process');
+      const enrichmentResult = await enrichmentResponse.json();
+      console.error('Enrichment API error:', enrichmentResult);
+      throw new Error(enrichmentResult.error || 'Failed to trigger enrichment process');
     }
 
     console.log('Enrichment process triggered successfully');
-
     revalidatePath('/clients');
-    return { success: true, client };
+    
+    return { 
+      success: true, 
+      client,
+      message: 'Client created and enrichment process started'
+    };
+
   } catch (error) {
     console.error('Error creating client:', error);
     return { 

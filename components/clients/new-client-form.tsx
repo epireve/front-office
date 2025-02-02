@@ -74,9 +74,12 @@ const industries = [
   "Other",
 ];
 
-export function NewClientForm() {
+interface NewClientFormProps {
+  onSuccess?: () => void;
+}
+
+export function NewClientForm({ onSuccess }: NewClientFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
   const [showCustomIndustry, setShowCustomIndustry] = useState(false);
   const { toast } = useToast();
 
@@ -103,17 +106,16 @@ export function NewClientForm() {
 
       const result = await createNewClient(finalData);
 
-      if (!result.success) {
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Client added successfully. Starting data enrichment...",
+        });
+        form.reset();
+        onSuccess?.();
+      } else {
         throw new Error(result.error || "Failed to create client");
       }
-
-      toast({
-        title: "Success",
-        description: "Client added successfully. Starting data enrichment...",
-      });
-
-      setIsOpen(false);
-      form.reset();
     } catch (error) {
       console.error("Error creating client:", error);
       toast({
@@ -128,134 +130,114 @@ export function NewClientForm() {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" /> New Client
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Add New Client</DialogTitle>
-          <DialogDescription>
-            Enter basic client information. Our AI agent will automatically
-            enrich the profile with additional details.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Company Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter company name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="website"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Website</FormLabel>
-                  <FormControl>
-                    <Input placeholder="example.com" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Company website URL - no need to add https://
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Location</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="City, State, Country, etc."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    General location for research purposes
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="industry"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Industry</FormLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      setShowCustomIndustry(value === "Other");
-                    }}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an industry" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {industries.map((industry) => (
-                        <SelectItem
-                          key={industry}
-                          value={industry.toLowerCase()}
-                        >
-                          {industry}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {showCustomIndustry && (
-              <FormField
-                control={form.control}
-                name="customIndustry"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Specify Industry</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter industry type" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    <>
+      <DialogHeader>
+        <DialogTitle>Add New Client</DialogTitle>
+        <DialogDescription>
+          Enter basic client information. Our AI agent will automatically enrich
+          the profile with additional details.
+        </DialogDescription>
+      </DialogHeader>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Company Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter company name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-            <div className="flex justify-end pt-4 space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {isLoading ? "Processing..." : "Add Client"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+          />
+          <FormField
+            control={form.control}
+            name="website"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Website</FormLabel>
+                <FormControl>
+                  <Input placeholder="example.com" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Company website URL - no need to add https://
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Location</FormLabel>
+                <FormControl>
+                  <Input placeholder="City, State, Country, etc." {...field} />
+                </FormControl>
+                <FormDescription>
+                  General location for research purposes
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="industry"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Industry</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    setShowCustomIndustry(value === "Other");
+                  }}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an industry" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {industries.map((industry) => (
+                      <SelectItem key={industry} value={industry.toLowerCase()}>
+                        {industry}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {showCustomIndustry && (
+            <FormField
+              control={form.control}
+              name="customIndustry"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Specify Industry</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter industry type" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+          <div className="flex justify-end pt-4 space-x-4">
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isLoading ? "Processing..." : "Add Client"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 }
