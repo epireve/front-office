@@ -1,7 +1,7 @@
 {
   "packageManager": "bun",
-  "installCommand": "bun add {packages}",
-  "devInstallCommand": "bun add -d {packages}",
+  "installCommand": "bunx bun add {packages}",
+  "devInstallCommand": "bunx bun add -d {packages}",
   "imports": {
     "@/lib/utils": {
       "cn": "import { cn } from \"@/lib/utils\";"

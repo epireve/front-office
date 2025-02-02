@@ -8,6 +8,8 @@ import { ClientDetailsSheet } from "./client-details-sheet";
 import { ReEnrichDialog } from "./re-enrich-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { EnrichmentTimer } from "@/components/clients/enrichment-timer";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import {
   Globe,
   MapPin,
@@ -18,6 +20,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+dayjs.extend(relativeTime);
 
 interface Client {
   id: string;
@@ -210,7 +214,11 @@ export function ClientGrid({ clients, onRefresh }: ClientGridProps) {
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center text-xs text-gray-500">
                 <Clock className="w-4 h-4 mr-1" />
-                Added: {new Date(client.created_at).toLocaleDateString()}
+                <span
+                  title={dayjs(client.created_at).format("MMMM D, YYYY h:mm A")}
+                >
+                  Added {dayjs(client.created_at).fromNow()}
+                </span>
               </div>
               <Button
                 variant="outline"
