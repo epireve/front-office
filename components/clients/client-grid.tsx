@@ -106,8 +106,9 @@ export function ClientGrid({ clients, onRefresh }: ClientGridProps) {
         {clients.map((client) => (
           <Card
             key={client.id}
-            className="p-6 transition-shadow hover:shadow-lg"
+            className="flex flex-col p-6 transition-shadow hover:shadow-lg h-[500px]"
           >
+            {/* Header */}
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-xl font-semibold">{client.name}</h3>
@@ -118,18 +119,18 @@ export function ClientGrid({ clients, onRefresh }: ClientGridProps) {
                       href={client.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-primary"
+                      className="truncate hover:text-primary"
                     >
                       {client.website}
                     </a>
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
                     <MapPin className="w-4 h-4 mr-2" />
-                    {client.address}
+                    <span className="truncate">{client.address}</span>
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
                     <Building2 className="w-4 h-4 mr-2" />
-                    {client.industry}
+                    <span className="truncate">{client.industry}</span>
                   </div>
                 </div>
               </div>
@@ -186,48 +187,64 @@ export function ClientGrid({ clients, onRefresh }: ClientGridProps) {
               </div>
             </div>
 
+            {/* Enriched Data */}
             {client.enriched_data && (
-              <div className="pt-4 mt-4 border-t">
+              <div className="flex-1 pt-4 mt-4 overflow-hidden border-t">
                 <h4 className="mb-2 text-sm font-medium text-gray-900">
                   AI Enriched Data
                 </h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-3 gap-2 mb-3 text-sm">
                   <div>
-                    <span className="text-gray-500">Employees:</span>
-                    <p>{client.enriched_data.employeeCount}</p>
+                    <span className="text-xs text-gray-500">Employees</span>
+                    <p className="font-medium truncate">
+                      {client.enriched_data.employeeCount || "Unknown"}
+                    </p>
                   </div>
                   <div>
-                    <span className="text-gray-500">Revenue:</span>
-                    <p>{client.enriched_data.revenue}</p>
+                    <span className="text-xs text-gray-500">Revenue</span>
+                    <p className="font-medium truncate">
+                      {client.enriched_data.revenue || "Unknown"}
+                    </p>
                   </div>
                   <div>
-                    <span className="text-gray-500">Founded:</span>
-                    <p>{client.enriched_data.founded}</p>
+                    <span className="text-xs text-gray-500">Founded</span>
+                    <p className="font-medium truncate">
+                      {client.enriched_data.founded || "Unknown"}
+                    </p>
                   </div>
                 </div>
-                <p className="mt-2 text-sm text-gray-600">
-                  {client.enriched_data.description}
-                </p>
+                <div>
+                  <span className="text-xs text-gray-500">Description</span>
+                  <p className="mt-1 text-sm text-gray-600 line-clamp-6">
+                    {client.enriched_data.description ||
+                      "No description available"}
+                  </p>
+                </div>
               </div>
             )}
 
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center text-xs text-gray-500">
-                <Clock className="w-4 h-4 mr-1" />
-                <span
-                  title={dayjs(client.created_at).format("MMMM D, YYYY h:mm A")}
+            {/* Footer */}
+            <div className="pt-4 mt-auto border-t">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center text-xs text-gray-500">
+                  <Clock className="w-4 h-4 mr-1" />
+                  <span
+                    title={dayjs(client.created_at).format(
+                      "MMMM D, YYYY h:mm A",
+                    )}
+                  >
+                    Added {dayjs(client.created_at).fromNow()}
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedClient(client)}
                 >
-                  Added {dayjs(client.created_at).fromNow()}
-                </span>
+                  View Details
+                  <ArrowUpRight className="w-3 h-3 ml-2" />
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedClient(client)}
-              >
-                View Details
-                <ArrowUpRight className="w-3 h-3 ml-2" />
-              </Button>
             </div>
           </Card>
         ))}
