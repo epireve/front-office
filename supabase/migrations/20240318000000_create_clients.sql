@@ -44,6 +44,11 @@ on clients for update
 to authenticated
 using (true);
 
+create policy "Enable delete access for authenticated users"
+on clients for delete
+to authenticated
+using (true);
+
 -- Create policies for enrichment_logs table
 create policy "Enable read access for authenticated users"
 on enrichment_logs for select
