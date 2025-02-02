@@ -42,11 +42,16 @@ export default function ClientsPage() {
   const [loading, setLoading] = useState(true);
 
   const loadClients = async () => {
-    const { success, clients: loadedClients } = await getClients();
-    if (success && loadedClients) {
-      setClients(loadedClients);
+    try {
+      const result = await getClients();
+      if (result?.clients) {
+        setClients(result.clients);
+      }
+    } catch (error) {
+      console.error("Error loading clients:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
